@@ -6,7 +6,7 @@ exports.getAllProducts = async (req,res) => {
         const products = await Product.getAll();
         title = "List product"
         res.render('product/index',{products,title});
-    
+        
     }catch(err){
         res.status(500).send("Error fetching products");
     }
@@ -26,11 +26,11 @@ exports.createProduct = async(req,res)=>{
             image_path = `/uploads/${req.file.filename}`;
         }
         await Product.create({ name, description, price, image: image_path });
-        // await Product.create(req.body);
         res.redirect("/product");
     }catch(err){
-        console.error(err.stack);
-        res.status(500).send("error creating product");
+        let backurl = '/product';
+        req.flash('error', err.sqlMessage);
+        return res.redirect(backurl);
     }
 }
 
@@ -65,10 +65,21 @@ exports.renderEditForm = async (req, res) => {
 // Update product
 exports.updateProduct = async (req, res) => {
     try {
-      await Product.update(req.params.id, req.body);
-      res.redirect('/product');
+        const { name, description, price } = req.body;
+        let image_path = "";
+
+        if (req.file) {
+            image_path = `/uploads/${req.file.filename}`;
+        }
+        else{
+            const product = await Product.getById(req.params.id);
+            image_path = product.image;
+            
+        }
+        await Product.update(req.params.id, { name, description, price, image: image_path });
+        
+        res.redirect('/product');
     } catch (err) {
-    console.log(err.stack);
       res.status(500).send('Error updating product');
     }
   };
