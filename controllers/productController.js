@@ -1,4 +1,5 @@
 const Product = require("../models/productModel");
+const upload = require('../config/multer');
 
 exports.getAllProducts = async (req,res) => {
     try{
@@ -18,10 +19,16 @@ exports.renderCreateForm = (req,res)=>{
 
 exports.createProduct = async(req,res)=>{
     try{
-        await Product.create(req.body);
+        const { name, description, price } = req.body;
+        let image_path = "";
+        // If there's an uploaded file, set the image path
+        if (req.file) {
+            image_path = `/uploads/${req.file.filename}`;
+        }
+        await Product.create({ name, description, price, image: image_path });
+        // await Product.create(req.body);
         res.redirect("/product");
     }catch(err){
-       
         console.error(err.stack);
         res.status(500).send("error creating product");
     }
