@@ -5,4 +5,4 @@ const userController = require('../controllers/userController');
 const methodOverride = require('method-override');
 router.use(methodOverride('_method'));
 
-router.get('/login',userController.login);
+// router.get('/login',userController.login);
